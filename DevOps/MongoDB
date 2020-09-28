@@ -1,3 +1,7 @@
 #MongoDB
 
 Getting Started
+*[Google Cloud Shell](https://console.cloud.google.com/home/dashboard?cloudshell=true)
+*git clone https://github.com/u1i/mongodb-getting-started
+*cd mongodb-getting-started
+*./run-mongo.sh
