@@ -1,7 +1,29 @@
 #MongoDB
 
-Getting Started
+##Getting Started
 *[Google Cloud Shell](https://console.cloud.google.com/home/dashboard?cloudshell=true)
-*git clone https://github.com/u1i/mongodb-getting-started
-*cd mongodb-getting-started
-*./run-mongo.sh
+* git clone https://github.com/u1i/mongodb-getting-started
+* cd mongodb-getting-started
+* ./run-mongo.sh
+
+#Commands
+
+##Databases
+* New/switch database: use "Database"
+* Check current database: db
+* See all databases: show databases
+* Deleting database: db.dropDatabase()
+
+##Collections
+* New collection: db.createCollection("file", options) 
+* See all collections: show collections
+* Deleting a collection: db."file".drop()
+
+## CRUD (Create, Read, Update, Delete)
+
+###Create
+* Adding 1 record: db."file".insert({"Key":"Key_value"})
+* Adding multiple records: db."file".insertMany({"Key1":"Key_value1","Key2":"Key_value2",...})
+
+###Read
+* Reading all records from Collection: db."file".find()
