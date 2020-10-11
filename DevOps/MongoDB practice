@@ -1,0 +1,77 @@
+
+1)	Create a collection to store information about the users (id, userName, mail, mobile), transaction (ItemId, price), Payment(Type,total,Success),remarks:
+
+db.createCollection("users")
+•	{ "ok" : 1 }
+
+
+2) Populate the collection with random data:
+
+db.users.insertMany({"Id": 100, "userName": "John", "mail": "John@gmail.com", "mobile": 123456789, "Transaction": [{"ItemId": "a100", "price": 200}, {"ItemId": "a110", "price": 200}], "Payment": {"Type": "Credit-Card", "Total": 400, "Success": "true"}, "Remarks": "1st Complete Record, payment successful"}, {"Id": 102, "userName": "Alice", "mail": "Alice@gmail.com", "mobile": 987654321, "Transaction": [{"ItemId": "a100", "price": 200}, {"ItemId": "a110", "price": 200}], "Payment": {"Type": "Credit-Card", "Total": 400, "Success": "true"}, "Remarks": "null"}
+•	WriteResult({ "nInserted" : 2 }) 
+
+Random data: ({"Id": 104, "userName": "Ali", "mail": "Ali@gmail.com", "mobile":984444321, "Transaction": [{"ItemId": "a200", "price": 400}, {"ItemId": "a310", "price": 600}], "Payment": {"Type": "Credit-Card", "Total": 1000, "Success": "true"},"Remarks": "null"}, {"Id": 105, "userName": "Lilly", "mail": "Lilly@gmail.com", "mobile": 986544321, "Transaction": [{"ItemId": "a310", "price": 600}], "Payment": {"Type": "Cash", "Total": 600, "Success": "true"}, "Remarks": "Paid with cash"}, {"Id": 106, "userName": "Trent", "mail": "Trent@gmail.com", "mobile": 98333321, "Transaction": [{"ItemId": "a100", "price": 200}, {"ItemId": "a310", "price": 600}], "Payment": {"Type": "Credit-Card", "Total": 800, "Success": "true"}, "Remarks": "null"}, {"Id": 107, "userName": "Tammy", "mail": "Tammy@gmail.com", "mobile": 98123321, "Transaction": [{"ItemId": "a100", "price": 200}, {"ItemId": "a220", "price": 450}], "Payment": {"Type": "Credit-Card", "Total": 650, "Success": "true"}, "Remarks": "null"}
+
+
+3)	Find any record where the total payment amount is greater than 700:
+
+db.users.find( {"Payment.Total": { $gt: 700 } }).pretty()
+•	{ "_id" : ObjectId("5f789462fd4dcbb80444b4d7"), "Id" : 104, "userName" : "Ali", "mail" : "Ali@gmail.com", "mobile" : 984444321, "Transaction" : [ { "ItemId" : "a200", "price" : 400 }, { "ItemId" : "a310", "price" : 600 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 1000, "Success" : "true" }, "Remarks" : "null" }
+•	{ "_id" : ObjectId("5f7894a4fd4dcbb80444b4d9"), "Id" : 106, "userName" : "Trent", "mail" : "Trent@gmail.com", "mobile" : 98333321, "Transaction" : [ { "ItemId" : "a100", "price" : 200 }, { "ItemId" : "a310", "price" : 600 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 800, "Success" : "true" }, "Remarks" : "null" }
+
+
+4)	Find the total payment of all the records:
+
+db.users.aggregate({$group:{_id : null, total: { $sum: "$Payment.Total"}}}).pretty()
+•	{ "_id" : null, "total" : 3850 }
+
+
+5)	Find the total Transaction price per record:
+
+db.users.aggregate([{$unwind:"$Transaction"}, {$group:{_id:"$Id", "Total": {$sum: "$Transaction.price"}}}])
+•	{ "_id" : 104, "Total" : 1000 }
+•	{ "_id" : 100, "Total" : 400 }
+•	{ "_id" : 102, "Total" : 400 }
+•	{ "_id" : 107, "Total" : 650 }
+•	{ "_id" : 106, "Total" : 800 }
+•	{ "_id" : 105, "Total" : 600 }
+
+
+6)	Find the max Transaction price:
+
+db.users.aggregate([{$unwind:"$Transaction"}, {$group:{_id:null, "Max Price": {$max: "$Transaction.price"}}}])
+•	{ "_id" : null, "Max Price" : 600 }
+
+
+7)	Find the record having the highest payment and the record having the lowest payment:
+
+db.users.aggregate([{$group:{_id:null, "Max Payment": {$max: "$Payment.Total"}}}])
+•	{ "_id" : null, "Max Payment" : 1000 }
+
+db.users.aggregate([{$group:{_id:null, "Min Payment": {$min: "$Payment.Total"}}}])
+•	{ "_id" : null, "Min Payment" : 400 }
+
+
+8)	Find the records that have the username either “John” or “Alice”:
+
+db.users.find({$or:[{"userName": "John"},{"userName": "Alice"}]})
+•	{ "_id" : ObjectId("5f789434fd4dcbb80444b4d5"), "Id" : 100, "userName" : "John", "mail" : "John@gmail.com", "mobile" : 123456789, "Transaction" : [ { "ItemId" : "a100", "price" : 200 }, { "ItemId" : "a110", "price" : 200 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 400, "Success" : "true" }, "Remarks" : "1st Complete Record, payment successful" }
+•	{ "_id" : ObjectId("5f78944cfd4dcbb80444b4d6"), "Id" : 102, "userName" : "Alice", "mail" : "Alice@gmail.com", "mobile" : 987654321, "Transaction" : [ { "ItemId" : "a100", "price" : 200 }, { "ItemId" : "a110", "price" : 200 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 400, "Success" : "true" }, "Remarks" : "null" }
+
+
+9)	Delete a record by using Id:
+
+db.users.remove({"Id": 107})
+•	WriteResult({ "nRemoved" : 1 })
+
+
+10)	Arrange the name of the users in ascending order:
+
+db.users.find().sort({"userName":1})
+•	{ "_id" : ObjectId("5f789462fd4dcbb80444b4d7"), "Id" : 104, "userName" : "Ali", "mail" : "Ali@gmail.com", "mobile" : 984444321, "Transaction" : [ { "ItemId" : "a200", "price" : 400 }, { "ItemId" : "a310", "price" : 600 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 1000, "Success" : "true" }, "Remarks" : "null" }
+•	{ "_id" : ObjectId("5f78944cfd4dcbb80444b4d6"), "Id" : 102, "userName" : "Alice", "mail" : "Alice@gmail.com", "mobile" : 987654321, "Transaction" : [ { "ItemId" : "a100", "price" : 200 }, { "ItemId" : "a110", "price" : 200 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 400, "Success" : "true" }, "Remarks" : "null" }
+•	{ "_id" : ObjectId("5f789434fd4dcbb80444b4d5"), "Id" : 100, "userName" : "John", "mail" : "John@gmail.com", "mobile" : 123456789, "Transaction" : [ { "ItemId" : "a100", "price" : 200 }, { "ItemId" : "a110", "price" : 200 } ], "Payment" : { "Type" : "Credit-Card", “Total": 400, "Success": "true", "Remarks": "1st Complete Record, payment successful"}
+•	{ "_id" : ObjectId("5f789481fd4dcbb80444b4d8"), "Id" : 105, "userName" : "Lilly", "mail" : "Lilly@gmail.com", "mobile" : 986544321, "Transaction" : [ { "ItemId" : "a310", "price" : 600 } ], "Payment" : { "Type" : "Cash", "Total" : 600, "Success" : "true" }, "Remarks" : "Paid with cash" }
+•	{ "_id" : ObjectId("5f7894a4fd4dcbb80444b4d9"), "Id" : 106, "userName" : "Trent", "mail" : "Trent@gmail.com", "mobile" : 98333321, "Transaction" : [ { "ItemId" : "a100", "price" : 200 }, { "ItemId" : "a310", "price" : 600 } ], "Payment" : { "Type" : "Credit-Card", "Total" : 800, "Success" : "true" }, "Remarks" : "null" }
+
+
