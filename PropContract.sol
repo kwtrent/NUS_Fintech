@@ -16,6 +16,7 @@ contract PropContractProject
     {
     address ethaddress;
     uint value;
+    string propAdd;
     uint landID;
     Status status;
     }
@@ -38,12 +39,13 @@ contract PropContractProject
     event Add(address _owner, uint _landID);
     
     //Add properties
-    function addProperty(address propertyOwner, uint _value) public isOwner
+    function addProperty(address propertyOwner, string memory _propAdd, uint _value) public isOwner
     {
         totalLandsCounter ++;
         Land memory  myLand = Land({
             ethaddress: propertyOwner,
             value : _value,
+            propAdd : _propAdd,
             landID :totalLandsCounter,
             status : Status.Pending
         });
@@ -54,36 +56,38 @@ contract PropContractProject
     //Buy properties
     function changeOwnership(uint _landId, address _buyer) public isOwner
     {
-        require(msg.sender != _buyer);
+        require(msg.sender != _buyer, "buyer and seller must not be the same");
         for(uint i = 0; i< __ownedLands[msg.sender].length; i++)
         {
-            if(__ownedLands[msg.sender][i].status == Status.Pending && __ownedLands[msg.sender][i].landID == _landId)
+            if( __ownedLands[msg.sender][i].landID == _landId)
             {
-                (__ownedLands[msg.sender][i].ethaddress == _buyer, __ownedLands[msg.sender][i].status == Status.Sold);
-            }
+                (__ownedLands[msg.sender][i].ethaddress = _buyer, __ownedLands[msg.sender][i].status = Status.Sold);
+            } 
         }
     }
     
     //Get unsold properties
-    function unsoldProperty(address _ethaddress) public view returns (uint,uint) 
-    {
+    function unsoldProperty(address _ethaddress) public view returns (uint[] memory) 
+    {   uint len;
+        len - __ownedLands[_ethaddress].length;
+        uint[] memory array = new uint[] (len);
         for(uint i = 0; i< __ownedLands[_ethaddress].length; i++)
         {
             if(__ownedLands[_ethaddress][i].status == Status.Pending)
             {
-                return (__ownedLands[_ethaddress][i].value, __ownedLands[_ethaddress][i].landID);
+                array[i] = ( __ownedLands[_ethaddress][i].landID);
             }
-        }
+        } return array;
     }
     
     //Get property details using ID and address
-    function getProperty(uint _landId, address _ethaddress) public view returns (Status, uint, address) {
+    function getProperty(uint _landId, address _ethaddress) public view returns (Status, uint, string memory) {
         for(uint i = 0; i< __ownedLands[_ethaddress].length; i++)
         {
             if(__ownedLands[_ethaddress][i].landID == _landId)
             {
-                return (__ownedLands[_ethaddress][i].status, __ownedLands[_ethaddress][i].value, __ownedLands[_ethaddress][i].ethaddress);
-            }
+                return (__ownedLands[_ethaddress][i].status, __ownedLands[_ethaddress][i].value, __ownedLands[_ethaddress][i].propAdd);
+                }
         }
     }
 
@@ -94,7 +98,7 @@ contract PropContractProject
         {
             if(__ownedLands[msg.sender][i].landID == _landId)
             {
-                __ownedLands[msg.sender][i].value == _newValue;
+                __ownedLands[msg.sender][i].value = _newValue;
             }
         }
     
